@@ -1,7 +1,7 @@
 <?php
 $admin = dddoip.serv00;
 $token = file_get_contents("token.txt");
-$brokweb = "https://two00050-3.onrender.com";
+$brokweb = "srv-d2p0qp95pdvs73bru0t0";
 #==================#
 
 #==================#
