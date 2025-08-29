@@ -37,10 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $botToken = null;
 
-        if ($idLineNumber !== null && $idLineNumber > 0) {
-            // استخراج السطر من الملف بعد الرجوع مرتين للخلف ثم الدخول إلى المسار المحدد
-            $botToken = getLineFromFile('../database/token.txt', $idLineNumber);
-        }
+$botToken = file_get_contents("../token.txt");
 
         if ($botToken) {
             $url = "https://api.telegram.org/bot$botToken/sendMessage";
