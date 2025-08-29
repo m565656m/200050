@@ -59,7 +59,10 @@ $idLineNumber = isset($_GET['ID2']) ? intval($_GET['ID2']) : null;
 
 $token = null;
 
-    $token = file_get_contents("../token.txt");
+if ($idLineNumber !== null && $idLineNumber > 0) {
+    // استخراج السطر من الملف بعد الرجوع مرتين للخلف ثم الدخول إلى المسار المحدد
+    $token = getLineFromFile('../database/token.txt', $idLineNumber);
+}
 
 // عرض النتيجة للتأكد
 
