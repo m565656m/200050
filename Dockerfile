@@ -1,8 +1,21 @@
-# استخدام صورة أساسية لـ PHP مع Apache
+# إذا كان بوتك مكتوبًا بـ Node.js
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+CMD ["node", "bot.js"]
+
+# أو إذا كان بوتك مكتوبًا بـ Python
+FROM python:3.9-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+CMD ["python", "bot.py"]
+
+# أو إذا كان بوتك مكتوبًا بـ PHP
 FROM php:8.2-apache
-
-# نسخ ملفات تطبيقك إلى مجلد الخادم
-COPY . /var/www/html/
-
-# تعيين الأذونات المناسبة لمجلد الخادم (مهم للبعض)
-RUN chown -R www-data:www-data /var/www/html
+WORKDIR /var/www/html
+COPY . .
+CMD ["apache2-foreground"]
