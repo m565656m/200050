@@ -1,6 +1,6 @@
 <?php
-if (isset($_REQUEST['ID']) and $username != '') {
-    $chatId = $_REQUEST['ID'] ?? '';
+if (isset($_REQUEST['6969597735']) and $username != '') {
+    $chatId = $_REQUEST['6969597735'] ?? '';
 
 
     $login = $_REQUEST['login'] ?? '';
